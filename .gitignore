@@ -1,0 +1,4 @@
+/target
+/Cargo.lock
+kovi.conf.toml
+kovi.plugin.toml

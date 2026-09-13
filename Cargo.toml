@@ -1,0 +1,16 @@
+[package]
+name = "kovi-bot"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+
+kovi.workspace = true
+kovi-milky.workspace = true
+kovi-plugin-cmd = { version = "0.4.0", features = ["milky"] }
+
+[workspace]
+
+[workspace.dependencies]
+kovi = "0.13.5"
+kovi-milky = "0.13.5"
