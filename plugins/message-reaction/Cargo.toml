@@ -8,3 +8,4 @@ kovi.workspace = true
 kovi-milky.workspace = true
 regex.workspace = true
 serde.workspace = true
+emoji-manager.workspace = true

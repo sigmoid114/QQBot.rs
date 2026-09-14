@@ -18,3 +18,4 @@ kovi = "0.13.5"
 kovi-milky = "0.13.5"
 regex="1"
 serde = { version = "1", features = ["derive"] }
+emoji-manager = { version = "0.1.0", path = "plugins/emoji-manager" }

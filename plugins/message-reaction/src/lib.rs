@@ -1,3 +1,4 @@
+use emoji_manager::is_emoji;
 use kovi::{
     PluginBuilder as P, RuntimeBot,
     tokio::sync::RwLock,
@@ -91,7 +92,17 @@ async fn on_group_msg(event: Arc<GroupMsgEvent>, data: Arc<RwLock<Data>>, bot: A
                     if let Some(text) = segment.data.get("text")
                         && let Some(text) = text.as_str()
                     {
-                        for c in text.chars() {}
+                        for c in text.chars() {
+                            if is_emoji(c).await {
+                                bot.send_group_message_reaction(
+                                    group_id,
+                                    message_seq,
+                                    &(c as u32).to_string(),
+                                    "emoji",
+                                    true,
+                                );
+                            }
+                        }
                     }
                 }
                 _ => {}
