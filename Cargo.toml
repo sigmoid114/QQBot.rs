@@ -8,9 +8,13 @@ edition = "2024"
 kovi.workspace = true
 kovi-milky.workspace = true
 kovi-plugin-cmd = { version = "0.4.0", features = ["milky"] }
+message-reaction = { version = "0.1.0", path = "plugins/message-reaction" }
 
 [workspace]
+members = ["plugins/message-reaction"]
 
 [workspace.dependencies]
 kovi = "0.13.5"
 kovi-milky = "0.13.5"
+regex="1"
+serde = { version = "1", features = ["derive"] }
