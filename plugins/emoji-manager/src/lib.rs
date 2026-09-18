@@ -17,7 +17,7 @@ static DATA: LazyLock<RwLock<Data>> =
     LazyLock::new(|| match load_json_data(Data::new(), DATA_PATH.clone()) {
         Ok(data) => RwLock::new(data),
         Err(e) => {
-            println!("插件 emoji-manager 数据格式错误(已清空)：{}", e);
+            println!("插件 emoji-manager 数据格式错误(自动清空)：{}", e);
             save_json_data(&Data::new(), DATA_PATH.clone()).unwrap();
             RwLock::new(Data::new())
         }

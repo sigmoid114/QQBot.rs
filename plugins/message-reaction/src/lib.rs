@@ -15,6 +15,17 @@ use std::{
 
 static CMD_REG: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^\$(.*)([+-])=message[-_]reaction$").unwrap());
+static BOT: LazyLock<Arc<RuntimeBot>> = LazyLock::new(|| P::get_runtime_bot());
+static DATA_PATH: LazyLock<PathBuf> = LazyLock::new(|| BOT.get_data_path().join("data.json"));
+static DATA: LazyLock<RwLock<Data>> =
+    LazyLock::new(|| match load_json_data(Data::new(), DATA_PATH.clone()) {
+        Ok(data) => RwLock::new(data),
+        Err(e) => {
+            println!("插件 message-reaction 数据格式错误(自动清空)：{}", e);
+            save_json_data(&Data::new(), DATA_PATH.clone()).unwrap();
+            RwLock::new(Data::new())
+        }
+    });
 
 #[derive(Serialize, Deserialize)]
 struct Data {
@@ -31,45 +42,30 @@ impl Data {
 
 #[kovi::plugin]
 async fn main() {
-    let bot = P::get_runtime_bot();
-    let data_path = bot.get_data_path().join("data.json");
-    match load_json_data(Data::new(), &data_path) {
-        Ok(data) => {
-            let data = Arc::new(RwLock::new(data));
-            P::on_admin_msg({
-                let data = data.clone();
-                move |event| on_admin_msg(event, data.clone(), data_path.clone())
-            });
-            P::on_group_msg({
-                let data = data.clone();
-                move |event| on_group_msg(event, data.clone(), bot.clone())
-            });
-        }
-        Err(e) => {
-            println!("插件 message-reaction 启动失败：{}", e);
-        }
-    }
+    let _ = &*BOT;
+    P::on_admin_msg(move |event| on_admin_msg(event));
+    P::on_group_msg(move |event| on_group_msg(event));
 }
 
-async fn on_admin_msg(event: Arc<AdminMsgEvent>, data: Arc<RwLock<Data>>, data_path: PathBuf) {
+async fn on_admin_msg(event: Arc<AdminMsgEvent>) {
     if let Some(text) = event.borrow_text() {
         let cmd: String = text.chars().filter(|c| !c.is_whitespace()).collect();
         if let Some(caps) = CMD_REG.captures(&cmd) {
-            let mut data = data.write().await;
+            let mut data = DATA.write().await;
             if &caps[2] == "+" {
                 data.groups.insert(String::from(&caps[1]));
             } else {
                 data.groups.remove(&caps[1]);
             }
-            save_json_data(&*data, data_path).unwrap();
+            save_json_data(&*data, &*DATA_PATH).unwrap();
         }
     }
 }
 
-async fn on_group_msg(event: Arc<GroupMsgEvent>, data: Arc<RwLock<Data>>, bot: Arc<RuntimeBot>) {
+async fn on_group_msg(event: Arc<GroupMsgEvent>) {
     let group_id = event.data.group.group_id;
     if {
-        let data = data.read().await;
+        let data = DATA.read().await;
         data.groups.contains(&group_id.to_string())
     } {
         let message_seq = event.data.message_seq;
@@ -79,7 +75,7 @@ async fn on_group_msg(event: Arc<GroupMsgEvent>, data: Arc<RwLock<Data>>, bot: A
                     if let Some(face_id) = segment.data.get("face_id")
                         && let Some(reaction) = face_id.as_str()
                     {
-                        bot.send_group_message_reaction(
+                        BOT.send_group_message_reaction(
                             group_id,
                             message_seq,
                             reaction,
@@ -94,7 +90,7 @@ async fn on_group_msg(event: Arc<GroupMsgEvent>, data: Arc<RwLock<Data>>, bot: A
                     {
                         for c in text.chars() {
                             if is_emoji(c).await {
-                                bot.send_group_message_reaction(
+                                BOT.send_group_message_reaction(
                                     group_id,
                                     message_seq,
                                     &(c as u32).to_string(),

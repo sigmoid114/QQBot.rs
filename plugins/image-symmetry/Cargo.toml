@@ -1,0 +1,13 @@
+[package]
+name = "image-symmetry"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+kovi.workspace = true
+kovi-milky.workspace = true
+image.workspace = true
+regex.workspace = true
+serde.workspace = true
+reqwest.workspace = true
+uuid.workspace = true

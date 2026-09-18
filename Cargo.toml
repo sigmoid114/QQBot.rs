@@ -9,9 +9,10 @@ kovi-milky.workspace = true
 kovi-plugin-cmd = { version = "0.4.0", features = ["milky"] }
 message-reaction = { version = "0.1.0", path = "plugins/message-reaction" }
 emoji-manager = { version = "0.1.0", path = "plugins/emoji-manager" }
+image-symmetry = { version = "0.1.0", path = "plugins/image-symmetry" }
 
 [workspace]
-members = ["plugins/emoji-manager","plugins/message-reaction"]
+members = ["plugins/emoji-manager", "plugins/image-symmetry","plugins/message-reaction"]
 
 [workspace.dependencies]
 kovi = "0.13.5"
@@ -19,3 +20,6 @@ kovi-milky = "0.13.5"
 regex="1"
 serde = { version = "1", features = ["derive"] }
 emoji-manager = { version = "0.1.0", path = "plugins/emoji-manager" }
+image = { version = "0.25.10", features = ["gif"]}
+reqwest = "0.13.5"
+uuid = { version = "1.26.1", features = ["v4"] }
